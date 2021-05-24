@@ -23,7 +23,7 @@ headers = {
     'Accept-Language': 'en-US,en;q=0.9',
 }
 
-path = 'G:/megabad/missing/'
+path = 'D:/Reuter_final/'
 
 
 proxy_list = pd.read_excel(path+"proxy.xlsx")['proxy'].tolist()
@@ -126,13 +126,13 @@ def get_response(i):
         resp = 0
     return resp
 
-url_list = pd.read_excel(path+"finall_miss_url.xlsx")['Product_url'].tolist()
+url_list = pd.read_excel(path+"finall_megabad_url.xlsx")['Product_url'].tolist()
 
 
-with open(path+'final_mega_product_page_data_300_550k.csv', 'w', newline='', encoding='utf-8') as file:
+with open(path+'final_mega_product_page_data_1_7k.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(["Supplier_ID", "URL","SKU", "Title", "Price", "Original Price", "Savings", "Manufacturer_EAN", "Products_Model", "Manufacturer_name", "Manufacturer_Series", "Shipping_Time"])
-    for i in url_list[300:550]:
+    for i in url_list[:70]:
         print(i)
         resp = get_response(i)
         if resp == 0:
