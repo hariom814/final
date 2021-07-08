@@ -24,10 +24,9 @@ def get_proxy():
     https_proxy = "https://{}".format(proxy)
 
 
-    proxyDict = {
-                  "http": http_proxy,
-                  "https": https_proxy
-                }
+    proxyDict = proxyDict = {'http': 'http://lum-customer-c_ffcfe734-zone-data_center:mz96ihm38ncv@zproxy.lum-superproxy.io:22225',
+            'https': 'http://lum-customer-c_ffcfe734-zone-data_center:mz96ihm38ncv@zproxy.lum-superproxy.io:22225'}
+    return proxyDict
     return proxyDict
 
 all_product_url = pd.read_excel(path+"finall_armaturenshop_url.xlsx")['Product_url'].tolist()
