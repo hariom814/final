@@ -6,13 +6,13 @@ import random
 from selenium import webdriver
 path = '/Users/hari/Documents/hari/'
 proxy_list = ['us-wa.proxymesh.com:31280','jp.proxymesh.com:31280']
-proxy = random.choice(proxy_list)
-proxy = proxy.split(":")[0]
+# proxy = random.choice(proxy_list)
+# proxy = proxy.split(":")[0]
 
-PROXY_HOST = proxy  # rotating proxy
-PROXY_PORT = 31280
-PROXY_USER = 'Vijaysrini'
-PROXY_PASS = 'Rtrmba@2020'
+PROXY_HOST = 'zproxy.lum-superproxy.io'  # rotating proxy
+PROXY_PORT = 22225
+PROXY_USER = 'lum-customer-c_ffcfe734-zone-data_center'
+PROXY_PASS = 'mz96ihm38ncv'
 
 
 manifest_json = """
