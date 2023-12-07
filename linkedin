@@ -1,0 +1,508 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from lxml import html
+import re
+from bs4 import BeautifulSoup
+from lxml import html
+import time
+import pandas as pd
+import csv 
+from selenium_stealth import stealth
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+
+# Creating an instance
+proxy="172.26.16.140:24010"
+options = webdriver.ChromeOptions()
+chromedriverlocation = "/usr/bin/chromedriver"
+options.add_argument("--proxy-server=%s" %proxy )
+driver = webdriver.Chrome(chromedriverlocation, options=options)
+driver.maximize_window()
+
+stealth(driver,
+        
+    languages=["en-US", "en"],
+    vendor="Google Inc.",
+    platform="Win32",
+    webgl_vendor="Intel Inc.",
+    renderer="Intel Iris OpenGL Engine",
+    fix_hairline=True,
+  )
+  
+  
+# Logging into LinkedIn
+driver.get("https://linkedin.com/uas/login")
+time.sleep(5)
+  
+username = driver.find_element_by_id("username")
+username.send_keys("ramkumartest2022@gmail.com")  # Enter Your Email Address
+  
+pword = driver.find_element_by_id("password")
+pword.send_keys("test_dev@123")        # Enter Your Password
+  
+driver.find_element_by_xpath("//button[@type='submit']").click()
+
+try:
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, '//input[@id="input__email_verification_pin"]')))
+    print("Ver found")
+    input_text = input("Enter Keys")
+    print("Keys : {}".format(input_text))
+except:
+    print("Verification not found")
+
+try:
+    ver_text_field = driver.find_element_by_xpath('//input[@id="input__email_verification_pin"]')
+    ver_text_field.send_keys(input_text)
+except:
+    print("Verification not bypassed")
+    
+try:
+    driver.find_element_by_xpath('//button[@id="email-pin-submit-button"]').click()
+    print("Submit clicked")
+except:
+    print("Submit not clicked")
+
+path = '/home/master/reuter/LinkedIN_Project/'
+df_profiles=pd.read_excel(path+'missing_profiles.xlsx',sheet_name='biogen')
+fname_lst=df_profiles['FIRST NAME'].tolist()
+lname_lst=df_profiles['LAST NAME'].tolist()
+        
+firm_lst=df_profiles['FIRM'].tolist()
+diversity_lst=df_profiles['DIVERSITY'].tolist()
+role_lst=df_profiles['ROLE'].tolist()
+focus_lst=df_profiles['FOCUS'].tolist()
+loc_lst=df_profiles['LOCATION'].tolist()
+
+name_lst=[]
+designation_lst=[]
+education_list=[]
+experience_list=[]
+summary_list=[]
+location_list=[]
+profile_url_lst=[]
+fname_list=[]
+lname_list=[]
+firm_list=[]
+diversity_list=[]
+role_list=[]
+focus_list=[]
+loc_list=[]
+
+for fname,lname,firm,diversity,role,focus,loc in zip(fname_lst,lname_lst,firm_lst,diversity_lst,role_lst,focus_lst,loc_lst):
+
+    print(fname,lname,firm)
+    if 'not available' in lname: 
+    
+        profile_name=str(fname)+' '+str(role)+' '+str(firm)
+    
+    else: 
+        profile_name=str(fname)+' '+str(lname)+' '+str(firm)
+    # profile_name="Stella Betancourt Merck"
+    print(profile_name)
+     
+    
+    
+    try:
+        WebDriverWait(driver, 50).until(EC.presence_of_element_located((By.XPATH, '//input[@placeholder="Search"]')))
+        print("Search Box found")
+    except:
+        print("Search Box not found...")
+        time.sleep(10)
+        continue
+
+    search_box=driver.find_element_by_xpath('//input[@placeholder="Search"]')
+    
+    time.sleep(2)
+
+    search_box.send_keys(profile_name)
+    
+    search_box.send_keys(Keys.RETURN)
+    
+    try:
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "(//div[@class='entity-result']//a[@class='app-aware-link'])[1]")))
+        print("profile found")
+    except:
+        print("profile not found...trying another search...")
+        
+        
+        
+        profile_name_new=str(fname)+' '+str(role)+' '+str(firm)
+
+        print(profile_name_new)
+        
+        try:
+        
+            search_box=driver.find_element_by_xpath('//input[@placeholder="Search"]').clear()
+            print('search box found...')
+        
+        # search_box.send_keys(Keys.DELETE)
+            
+            search_box.send_keys(profile_name_new)
+        
+            print('new search...')
+            
+        except Exception as e:
+            print('exception raised in new search...',e)
+            print('profile not found..')
+            
+            continue 
+        
+        search_box.send_keys(Keys.RETURN)
+
+    time.sleep(2)
+
+    # search_box.send_keys(Keys.RETURN)
+
+    time.sleep(6)
+    
+    try:
+        try:
+            driver.find_element_by_xpath("//div[@class='entity-result']/a").click()
+            
+            print('profile button clicked...')
+        except:
+            driver.find_element_by_xpath("(//div[@class='entity-result']//a)[1]").click()
+            print('profile button clicked in exception...')
+            
+    except:
+        print('in main exception of button click...')
+        click_button= driver.find_element_by_xpath("//div[@class='entity-result']/a")
+        driver.execute_script("arguments[0].click();", click_button)
+
+    time.sleep(5)
+
+    initialScroll = 0
+    finalScroll = 1000
+
+    while True:
+        driver.execute_script(f"window.scrollTo(0,1000)")
+        
+        initialScroll = finalScroll
+        finalScroll += 1000
+
+        time.sleep(3)
+
+        src = driver.page_source
+        tree = html.fromstring(src)
+        soup = BeautifulSoup(src, 'lxml')
+        
+        try:
+
+            name=soup.find('h1')
+            name = name.get_text().strip()
+            
+        except:
+            name='NA'
+            print('name not found...refreshing page...')
+            time.sleep(5)
+            
+            driver.refresh()
+         
+        
+        try:
+        
+            designation=soup.find('div',{'class':'text-body-medium break-words'})
+            designation = designation.get_text().strip()
+            
+        except:
+            designation='-'
+            
+        print("name :",name)
+        print("designation :",designation)
+        break
+    
+    profile_url=driver.current_url
+
+    tree = html.fromstring(src)
+    
+    try:
+        designation=tree.xpath("//div[@class='text-body-medium break-words']/text()")[0].strip()
+        
+    except:
+        designation='-'
+        
+    experience=tree.xpath("//h2/span[contains(text(),'Experience')]/ancestor::div[@class='pvs-header__container']/following-sibling::div/ul/li/div/div[2]/div//text()")
+    experience=list(set(experience))
+    experience_lst=[]
+    for experience in experience:
+        if re.search("[a-zA-Z]+", experience):
+            experience_lst.append(experience)
+
+
+
+
+    
+    
+    url_req = 'NA'
+    a=driver.find_elements_by_xpath("//div[@class='pvs-list__footer-wrapper']/a")
+    b_1 = driver.find_elements_by_xpath("//div[@class='pvs-list__footer-wrapper']/a/span")
+    b_new = [x for x in b_1 if ('education' in x.text.strip()) or ('position' in x.text.strip())]
+    print('link_text:',b_new)
+    if len(b_new) != 0:
+        b_req = driver.find_elements_by_xpath("//div[@class='pvs-list__footer-wrapper']/a/span")
+        a_req = driver.find_elements_by_xpath("//div[@class='pvs-list__footer-wrapper']/a")
+    else:
+        b_req = driver.find_elements_by_xpath("//div[@class='pvs-list__footer-wrapper']//a/span")
+        a_req = driver.find_elements_by_xpath("//div[@class='pvs-list__footer-wrapper']//a")
+    print(len(a_req), len(b_req))
+    for link, t in zip(a_req, b_req):
+        text_r = t.text.strip()
+        print(text_r)
+        href = link.get_attribute("href")
+        if ('education' in text_r) or ('position' in text_r):
+            url_req = href
+            print(url_req)
+            print("HREF Found")
+#            
+    print("URL req : {}".format(url_req))
+    if url_req != 'NA':
+        driver.get(url_req)
+        print('waiting for few secs')
+        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//h2[@class='t-20 t-bold ph3 pt3 pb2']")))
+        driver.execute_script(f"window.scrollTo(0,1000)")
+        src_edu = driver.page_source
+        tree_edu = html.fromstring(src_edu)
+        
+        edu_lst=[]
+        
+        li_tag_lst=tree_edu.xpath("//h2[@class='t-20 t-bold ph3 pt3 pb2']/ancestor::div[@class='display-flex justify-flex-start align-items-center pt3 ph3']/following-sibling::div/div/div/ul/li/div/div[2]")
+
+        # li_tag_lst
+        edu_lst_1=[]
+
+        # year=tree_1.xpath("//h2[@class='t-20 t-bold ph3 pt3 pb2']/ancestor::div[@class='display-flex justify-flex-start align-items-center pt3 ph3']/following-sibling::div/div/div/ul/li//span[@class='t-14 t-normal t-black--light'][1]/span[1]/text()")
+        
+        # year_new=[yr for yr in year if 'yr' in yr.split(' ') or 'mo' in yr.split(' ') or 'mos' in yr.split(' ') or 'yrs' in yr.split(' ')]
+        # print(year_new)
+        
+        # j_r_l = []
+        # org_l = []
+        
+        for li_tag in li_tag_lst:
+
+            edu_list=li_tag.xpath(".//span[@aria-hidden='true']/text()")
+            # if len(job_role)>0:
+            print(edu_list)
+                # org=job_role[0]
+                # for job in job_role[1:]:
+                    # print(job)
+                # j_r_l.append(job)
+            edu_lst.append(edu_list)
+        
+        
+        driver.get(profile_url)
+        print('back to main page...')
+        time.sleep(4)
+        
+        
+        
+    else:
+
+        edu_lst=[]
+    # edu_list_1 = []
+    # univ=tree.xpath("//h2/span[contains(text(),'Education')]/ancestor::div[@class='pvs-header__container']/following-sibling::div/ul/li/div/div[2]/div/a/div/span/span[1]/text()")
+    # degree=tree.xpath("//h2/span[contains(text(),'Education')]/ancestor::div[@class='pvs-header__container']/following-sibling::div/ul/li/div/div[2]/div/a/span[1]/span[1]/text()")
+    # year=tree.xpath("//h2/span[contains(text(),'Education')]/ancestor::div[@class='pvs-header__container']/following-sibling::div/ul/li/div/div[2]/div/a/span[2]/span[1]/text()")
+    
+        education=tree.xpath("//h2/span[contains(text(),'Education')]/ancestor::div[@class='pvs-header__container']/following-sibling::div/ul/li/div/div[2]//a")
+          
+
+        for edu in education:
+        
+            # edu.strip()
+            
+            edu_data=edu.xpath(".//span[@aria-hidden='true']/text()")
+            edu_lst.append(edu_data)
+        
+        # edu='University:'+str(univ)+' | '+'Degree:'+str(degree)+' | '+'Year:'+str(year)
+        # edu_list_1.append(edu.replace('\n','').replace('\t','').strip())
+        
+    # edu_lst = [x for x in edu_list_1 if x!='']
+   
+   
+   
+    url_req = 'NA'
+    a=driver.find_elements_by_xpath("//div[@class='pvs-list__footer-wrapper']/a")
+    b_1 = driver.find_elements_by_xpath("//div[@class='pvs-list__footer-wrapper']/a/span")
+    b_new = [x for x in b_1 if ('experiences' in x.text.strip() and 'volunteer' not in x.text.strip()) or ('position' in x.text.strip())]
+    print('link_text:',b_new)
+    if len(b_new) != 0:
+        b_req = driver.find_elements_by_xpath("//div[@class='pvs-list__footer-wrapper']/a/span")
+        a_req = driver.find_elements_by_xpath("//div[@class='pvs-list__footer-wrapper']/a")
+    else:
+        b_req = driver.find_elements_by_xpath("//div[@class='pvs-list__footer-wrapper']//a/span")
+        a_req = driver.find_elements_by_xpath("//div[@class='pvs-list__footer-wrapper']//a")
+    print(len(a_req), len(b_req))
+    for link, t in zip(a_req, b_req):
+        text_r = t.text.strip()
+        print(text_r)
+        href = link.get_attribute("href")
+        if ('experiences' in text_r and 'volunteer' not in text_r) or ('position' in text_r):
+            url_req = href
+            print(url_req)
+            print("HREF Found")
+#            
+    print("URL req : {}".format(url_req))
+    if url_req != 'NA':
+        driver.get(url_req)
+        print('waiting for few secs')
+        
+        try:
+            WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//h2[@class='t-20 t-bold ph3 pt3 pb2']")))
+            
+        except Exception as e:
+            print('exception raised in experience section...',e)
+            time.sleep(4)
+            
+        driver.execute_script(f"window.scrollTo(0,1000)")
+        src_1 = driver.page_source
+        tree_1 = html.fromstring(src_1)
+        
+        li_tag_lst=tree_1.xpath("//h2[@class='t-20 t-bold ph3 pt3 pb2']/ancestor::div[@class='display-flex justify-flex-start align-items-center pt3 ph3']/following-sibling::div/div/div/ul/li/div/div[2]")
+
+        # li_tag_lst
+        job_lst_1=[]
+
+        # year=tree_1.xpath("//h2[@class='t-20 t-bold ph3 pt3 pb2']/ancestor::div[@class='display-flex justify-flex-start align-items-center pt3 ph3']/following-sibling::div/div/div/ul/li//span[@class='t-14 t-normal t-black--light'][1]/span[1]/text()")
+        
+        # year_new=[yr for yr in year if 'yr' in yr.split(' ') or 'mo' in yr.split(' ') or 'mos' in yr.split(' ') or 'yrs' in yr.split(' ')]
+        # print(year_new)
+        
+        # j_r_l = []
+        # org_l = []
+        
+        for li_tag in li_tag_lst:
+
+            job_role=li_tag.xpath(".//span[@aria-hidden='true']/text()")
+            # job_role=str(job_role)
+            # if len(job_role)>0:
+            print(job_role)
+                # org=job_role[0]
+                # for job in job_role[1:]:
+                    # print(job)
+                # j_r_l.append(job)
+            job_lst_1.append(job_role)
+                    # org_l.append(org)
+
+                    # continue
+
+            # job_role=li_tag.xpath(".//div/div[2]/div/div/div/span/span[1]/text()")
+            # if len(job_role)>0:
+                # print(job_role)
+                # org=li_tag.xpath(".//div/div[2]/div/div/span[1]/span[1]/text()")
+                # for job,org in zip(job_role,org):
+                    # print(job,org)
+                    # j_r_l.append(job)
+                    # org_l.append(org)
+        
+        # if len(year_new) == len(j_r_l):
+            # print("Equal Length")
+            # for job, org, year_req in zip(j_r_l, org_l, year_new):
+                # print(job, org, year_req)
+                # job_req='Job role:'+str(job)+' | '+'Organization:'+str(org)+' | '+'Year:'+str(year_req)
+                # job_lst_1.append(job_req)
+        # else:
+            # print("Not Equal Length")
+            # for job, org, year_req in zip(j_r_l[1:], org_l, year_new):
+                # print(job, org, year_req)
+                # job_req='Job role:'+str(job)+' | '+'Organization:'+str(org)+' | '+'Year:'+str(year_req)
+                # job_lst_1.append(job_req)
+                
+    else:
+        
+        li_tag_lst=tree.xpath("//h2/span[contains(text(),'Experience')]/ancestor::div[@class='pvs-header__container']/following-sibling::div/ul/li//div/div[2]/div[1]")
+        
+        # "//h2/span[contains(text(),'Experience')]/ancestor::div[@class='pvs-header__container']/following-sibling::div/ul/li//div[2]//ul/li/div/div[2]/div[1]/a"
+        
+      #  li_tag_lst
+        job_lst_1=[]
+
+        for li_tag in li_tag_lst:
+            # exp_section=li_tag.xpath(".//div[2]//ul/li/div/div[2]/div[1]/a//span[@aria-hidden='true']/text()")
+            # job_role=li_tag.xpath(".//div/div[2]/div[1]/a")
+            
+            # job_role=li_tag.xpath(".//span[contains(@class,'hoverable-link-text')]/span[1]/text()")
+            # if len(job_role)>0:
+                # print(job_role)
+                # year=tree.xpath("//div[@id='experience']/ancestor::section//ul/li//div[@class='display-flex align-items-center']/span[contains(@class,'hoverable-link-text')]/../following-sibling::span[1]/span[1]/text()")
+                
+                ##//h2/span[contains(text(),'Experience')]/ancestor::div[@class='pvs-header__container']/following-sibling::div/ul/li//div[2]//ul/li/div/div[2]/div[1]/a/span[2] -- when full-time 
+                
+                ##//h2/span[contains(text(),'Experience')]/ancestor::div[@class='pvs-header__container']/following-sibling::div/ul/li//div[2]//ul/li/div/div[2]/div[1]/a//span[@aria-hidden='true']/text() -- xpath entire experience box 
+                
+                # year_new=[yr for yr in year if 'yr' in yr or 'mo' in yr or 'mos' in yr or 'yrs' in yr]
+                
+                # final=[]
+            # for data in job_role:
+            data_final=li_tag.xpath(".//span[@aria-hidden='true']/text()")
+            # data_final=str(data_final)
+            job_lst_1.append(data_final)
+            print(job_lst_1)
+                
+                # print(year_new)
+                # org=job_role[0]
+
+                # for job,year in zip(job_role[1:],year_new[1:]):
+                    # print(job,year)
+                    # job='Job role:'+str(job)+' | '+'Organization:'+str(org)+' | '+'Year:'+str(year)
+                # job_lst_1.append(data_final)
+
+                    
+
+            # job_role=li_tag.xpath(".//div/div[2]/div/div/div/span/span[1]/text()")
+            # if len(job_role)>0:
+                # print(job_role)
+                # year=li_tag.xpath(".//div/div[2]/div/div/span[2]/span[1]/text()")
+                # year_new=[yr for yr in year if 'yr' in yr or 'mo' in yr or 'mos' in yr or 'yrs' in yr]
+                
+                # org=li_tag.xpath(".//div/div[2]/div/div/span[1]/span[1]/text()")
+
+                # for job,org,year in zip(job_role,org,year_new):
+                    # print(job,org,year)
+                    # job='Job role:'+str(job)+' | '+'Organization:'+str(org)+' | '+'Year:'+str(year)
+                    # job_lst_1.append(job)
+
+    
+    summary=tree.xpath("//h2/span[contains(text(),'About')]/ancestor::div[@class='pvs-header__container']/following-sibling::div[1]/div/div/div/span[1]/text()")
+            
+    name_lst.append(name)
+    designation_lst.append(designation)
+    education_list.append(edu_lst)
+    experience_list.append(job_lst_1)
+    summary_list.append(summary)
+    
+    try:
+    
+        location=tree.xpath("//div[@class='pb2 pv-text-details__left-panel']/span[1]/text()")
+        location=list(set(location))
+        location_lst=[]
+        for location in location:           
+            if re.search("[a-zA-Z]+", location):
+                location=location.strip()
+                location_lst.append(location)
+                
+    except Exception as e:
+        print('location not found...')
+        location_lst='-'
+            
+    location_list.append(location_lst)
+    
+    
+    profile_url_lst.append(profile_url)
+    firm_list.append(firm)
+    fname_list.append(fname)
+    lname_list.append(lname)
+    diversity_list.append(diversity)
+    role_list.append(role)
+    focus_list.append(focus)
+    loc_list.append(loc)
+        
+    df_final=pd.DataFrame({'Firm':firm_list,'Last name':lname_list,'First name':fname_list,'Role':role_list,'Focus':focus_list,'Location':loc_list,'Diversity':diversity_list,'Name':name_lst,'Designation':designation_lst,'Location_profile':location_list,'Summary':summary_list,'Experience':experience_list,'Education':education_list,'Profile url':profile_url_lst})
+    
+    df_final.to_csv(path+'linkedin_data_08_04_missing_biogen.csv', index=False)
+
+driver.quit()
