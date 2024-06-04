@@ -1,76 +1,62 @@
-# -*- coding: utf-8 -*-
+Hi
 
 
-from scrapy import Selector
-from datetime import datetime
-import os
-import time
-import pandas as pd
-import requests
-import random
-import traceback
+ChatGPT
 
-path = "/home/master/Ibex/armaturenshop"
+Write a leave mail and work from home mail to manager for marriage
+ChatGPT
+Sure, here are examples of both emails:
 
-date = datetime.now().strftime("%Y-%m-%d")
-outpath = path + "/Output/" + date
+Leave Request Email for Marriage
+Subject: Leave Request for Marriage
 
-proxy_list = pd.read_excel(path+"/proxy.xlsx")['proxy'].tolist()
+Dear [Manager's Name],
 
-def get_proxy():
-    proxy = random.choice(proxy_list)
+I hope this message finds you well. I am writing to formally request leave for my upcoming marriage. The ceremony is scheduled for [date], and I would like to request leave from [start date] to [end date] to make necessary preparations and spend time with family.
 
-    http_proxy = "http://{}".format(proxy)
-    https_proxy = "https://{}".format(proxy)
+I have ensured that my current tasks are up to date and have briefed my colleagues on any ongoing projects to ensure a smooth workflow in my absence. I will be reachable via email and phone for any urgent matters that may arise during this period.
 
+Thank you for considering my request. Please let me know if you need any further information or if there are any forms or procedures I need to complete to process this request.
 
-    proxyDict = proxyDict = {'http': 'http://lum-customer-c_ffcfe734-zone-data_center:mz96ihm38ncv@zproxy.lum-superproxy.io:22225',
-            'https': 'http://lum-customer-c_ffcfe734-zone-data_center:mz96ihm38ncv@zproxy.lum-superproxy.io:22225'}
-    return proxyDict
-    return proxyDict
+Best regards,
+[Your Name]
+[Your Position]
+[Your Contact Information]
 
-all_product_url = pd.read_excel(path+"finall_armaturenshop_url.xlsx")['Product_url'].tolist()
-import csv
-with open(path+'/armaturenshop.csv', 'w', newline='',encoding='utf-8-sig') as file:
-    writer = csv.writer(file)
-    writer.writerow(["Title", "Item_no","EAN","Price","Shiping_time","Description","Link","Brand","Article no"])
-    for i in range(0,len(all_product_url)):
-        retry = 0
-        while retry < 10:
-            try:
-                response = requests.get(all_product_url[i],verify=False,proxies=get_proxy())
-                # time.sleep(random.randint(0,2))
-                print("Using proxy")
-                break
-            except:
-                traceback.print_exc()
-                retry += 1
-                print(retry)
-            if retry == 10:
-                print("from normal request")
-                response = requests.get(all_product_url[i], verify=False)
-        response = Selector(text=response.text)
-        title = response.xpath('//h1[@class="fn product-title"]//text()').extract_first()
-        item_no = response.xpath('//span[@itemprop="sku"]//text()').extract_first()
-        ean = response.xpath('//span[@itemprop="gtin13"]//text()').extract_first()
-        try:
-            price = response.xpath('//strong[@class="price text-nowrap"]/span/text()').extract_first().replace('€','')
-        except:
-            price = "NA"
-        try:
-            shiping_time = response.xpath('//p[@class="estimated-delivery"]/span/text()').extract_first()
-        except:
-            shiping_time = "NA"
-        try:
-            model = response.xpath('//div[@class="shortdesc"]/text()').extract_first().strip()
-        except:
-            model = "NA"
-        try:
-            article = response.xpath('//*[@id="AktuellerkArtikel"]/@value').extract_first()
-        except:
-            article = "NA"
-        writer.writerow([title,item_no,ean,price,shiping_time,model,all_product_url[i],all_brands[i],article])
+Work From Home Request Email for Marriage Preparations
+Subject: Request to Work From Home for Marriage Preparations
+
+Dear [Manager's Name],
+
+I hope you are doing well. As you may be aware, my wedding is approaching on [date], and I am in the midst of finalizing arrangements. To better manage my time and ensure all preparations are completed smoothly, I am writing to request permission to work from home from [start date] to [end date].
+
+During this period, I will remain fully committed to my responsibilities and will ensure that all my tasks are completed efficiently. I will be accessible via email, phone, and our team's collaboration tools to maintain effective communication and collaboration with the team.
+
+I appreciate your understanding and support during this important time in my life. Please let me know if you have any concerns or require any further information.
+
+Thank you for your consideration.
+
+Best regards,
+[Your Name]
+[Your Position]
+[Your Contact Information]
 
 
 
 
+
+Both should be in single email
+ChatGPT
+Certainly! Here's a combined email that includes both a leave request and a request to work from home for marriage preparations:
+
+Subject: Leave and Work From Home Request for Marriage
+
+Dear [Manager's Name],
+
+I hope this message finds you well. I am writing to inform you about my upcoming marriage, which is scheduled for [date]. To ensure everything goes smoothly, I would like to request the following:
+
+Work From Home: I would like to work from home from [start date] to [end date] to manage the final preparations for the wedding. During this period, I will remain fully committed to my responsibilities and will ensure that all tasks are completed efficiently. I will be accessible via email, phone, and our team's collaboration tools to maintain effective communication and collaboration.
+
+Leave: I would like to request leave from [start date] to [end date] to fully participate in the wedding ceremonies and spend time with family. I have ensured that my current tasks are up to date and have briefed my colleagues on any ongoing projects to ensure a smooth workflow in my absence. I will be reachable via email and phone for any urgent matters during this period.
+
+Thank you for considering my requests. Please let me know if you need any further information or if there are any forms or procedures I need to complete to process these requests.
